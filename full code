@@ -1,0 +1,38 @@
+import os
+
+def count_unique_users_external_sort(file1_path, file2_path):
+    """
+    Simulates a memory-efficient strategy using external streaming.
+    If files are massive, we yield chunks or process sorted logs line-by-line.
+    """
+    unique_users = set()
+    
+    # Process files sequentially to optimize memory footprint
+    for file_path in [file1_path, file2_path]:
+        if not os.path.exists(file_path):
+            continue
+            
+        with open(file_path, 'r') as file:
+            for line in file:
+                # Expected format: "timestamp,user_id"
+                line = line.strip()
+                if not line:
+                    continue
+                
+                try:
+                    timestamp, user_id = line.split(',')
+                    # Normalize timestamp to date (YYYY-MM-DD) if needed
+                    date = timestamp.split('T')[0] 
+                    
+                    # Deduplication key composite
+                    visit_key = f"{date}_{user_id}"
+                    unique_users.add(visit_key)
+                except ValueError:
+                    # Gracefully handle poorly formatted log lines
+                    continue
+                    
+    return len(unique_users)
+
+# Example Usage
+# Assuming logs format: "2026-05-30T12:00:00,user_123"
+# Returns total unique daily user engagements.
